@@ -56,3 +56,12 @@ class WeeklyMealPlan(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+class Recipe(models.Model):
+    user = models.ForeignKey(Users, on_delete=models.CASCADE, related_name="recipes")
+    title = models.CharField(max_length=100)
+    description = models.TextField(blank=True, null=True)
+    ingredients = models.TextField() 
+    steps = models.TextField()      
+    cooking_time = models.IntegerField(help_text="time in minutes", default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)

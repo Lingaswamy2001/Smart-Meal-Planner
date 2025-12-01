@@ -5,8 +5,8 @@ from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 import json
 from .utils import hash_password,check_password
-from .serializers import UsersSerializers,PreferencesSerializers,IngredientsSerializer,WeeklyMealPlanSerializer
-from .models import Users,Preferences,Ingredients,WeeklyMealPlan
+from .serializers import UsersSerializers,PreferencesSerializers,IngredientsSerializer,WeeklyMealPlanSerializer,RecipeSerializer
+from .models import Users,Preferences,Ingredients,WeeklyMealPlan,Recipe
 
 # Create your views here.
 @method_decorator(csrf_exempt,name='dispatch')
@@ -171,6 +171,56 @@ class WeeklyMealPlanView(View):
 
         plan.delete()
         return JsonResponse({"status": "meal plan deleted"})
+
+
+@method_decorator(csrf_exempt, name="dispatch")
+class RecipeView(View):
+
+    def get(self, request, user_id=None, id=None):
+        if id:
+            try:
+                recipe = Recipe.objects.get(id=id)
+                sr = RecipeSerializer(recipe)
+                return JsonResponse({"status": 200, "recipe": sr.data})
+            except Recipe.DoesNotExist:
+                return JsonResponse({"status": 404, "error": "Recipe not found"})
+
+        if user_id:
+            recipes = Recipe.objects.filter(user_id=user_id)
+            sr = RecipeSerializer(recipes, many=True)
+            return JsonResponse({"status": 200, "recipes": sr.data})
+
+        return JsonResponse({"status": 400, "error": "Invalid request"})
+
+    def post(self, request):
+        data = json.loads(request.body)
+        sr = RecipeSerializer(data=data)
+        if sr.is_valid():
+            sr.save()
+            return JsonResponse({"status": 201, "message": "Recipe created successfully"})
+        return JsonResponse({"status": 400, "errors": sr.errors})
+
+    def patch(self, request, id):
+        try:
+            recipe = Recipe.objects.get(id=id)
+        except Recipe.DoesNotExist:
+            return JsonResponse({"status": 404, "error": "Recipe not found"})
+
+        data = json.loads(request.body)
+        sr = RecipeSerializer(recipe, data=data, partial=True)
+        if sr.is_valid():
+            sr.save()
+            return JsonResponse({"status": 200, "message": "Recipe updated"})
+        return JsonResponse({"status": 400, "errors": sr.errors})
+
+    def delete(self, request, id):
+        try:
+            recipe = Recipe.objects.get(id=id)
+        except Recipe.DoesNotExist:
+            return JsonResponse({"status": 404, "error": "Recipe not found"})
+
+        recipe.delete()
+        return JsonResponse({"status": 200, "message": "Recipe deleted"})
 
 
 

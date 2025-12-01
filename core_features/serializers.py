@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Users,Preferences,Ingredients,WeeklyMealPlan
+from .models import Users,Preferences,Ingredients,WeeklyMealPlan,Recipe
 
 class UsersSerializers(serializers.ModelSerializer):
     class Meta:
@@ -23,3 +23,8 @@ class WeeklyMealPlanSerializer(serializers.ModelSerializer):
     class Meta:
         model = WeeklyMealPlan
         fields = "__all__"
+
+class RecipeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Recipe
+        fields = '__all__'
